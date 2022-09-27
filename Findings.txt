@@ -1,0 +1,44 @@
+Line Record and Redraw
+
+The project is supposed to be done using m3pi robot. m3pi robot is the compination of 3pi robot and mbed microcontroller.
+mbed microcontroller is a powerful microcontroller which can be programmed in several languages to make it work as we needed.
+Our prefered language is C++ since most of libraries of mbed is developed in C++. 
+
+The intention of the project is to let the m3pi robot follow a given line figures and record it at the same time and redraw it later.
+3pi has 5 photo sensors to detect brighness. Each one gives a value ranging from 0 to 1000 depending on brightness of the plane on which currently is.
+one end value detects the darkness and the other end value is the maximum brightness (black to white). Thus the five sensors can be checked for detecting black or white spot on the plane the robot is let to run. m3pi has three push button, one is the power button, another one connected to pin 21. The other push button is not connected to any pin and it can be connected to any available pin so that it can be used. 
+
+Since we need to code for mbed to work with m3pi, we are provided with m3pi library which is developed in C++ using th underlying mbed libraries. 
+
+Upon working with the m3pi library it is found that in 3pi it uses a slave and master program which communicates serialy with mbed. And the from old m3pi library for new m3pi library it has removed many functions like read_sensors(int[]). These functions are very much needed for programs like line follower. Instead of this function they provides a function named m3pi.line_position() which provides you a floating point value ranging from -1.0 to 1, which let us know where the position of black line under the sensor is!. So options left with using this library with altered line follower design or change or create a new entire library which uses the master-slave program directly to ake use of 3pi maximum. Since the time was not enough, selected the first option. 
+
+The robot calibrates and follows the line controlling the motor as required with the position of line under the 5 sensors. But since there is no way it can detect a white or completely black area, it is designed to stop after particular time interval. 
+
+Then as per the requirement it has to store the data we obtained from the sensor using m3pi.line_position() function. 
+std::vector data type was used to store data. it worked fine under 4 seconds. It crached after that. And it was findout that the ram memory was not adequate to store large amount of data. So mbed's flash drive was introduced to the project. Searched for mbed libraries to work with, found some sample codes on mbed code section which was published there. But most of them was not working, guessing the libraries might have been changed like it has to m3pi library. 
+
+Finally a project that explained how to use a USB flash drive is spotted and found working on checking. So that project was edited to save data from the sensor. The libraries used are FATFileSystem, USBHostLite and there was this supportive MSCFileSystem.cpp and MSCFileSystem.h, which defines a class that lets the programmer make use to use the USB Flash drive. Thus the line position data was stored and it was able to run for a long time still there was lot of memory in the flash left unused. 
+
+The data was wrtitten to a file in the flash drive. The next procedure is to open the file for reading those stored data and provide to the prgram as if it is from the sensor. Then it was find out that the sensor was having some delay in providing data considering the flash drive, so the line redrawn was too small that it didnt really looked like it is drawing the same stored data. So it has to provide some delay to make it draw the atleast almost the same figure it stored. We created a delay by introducing some loops, which worked fine in drawing the recorded figure.
+
+Now we have the robot record and redraw the figure it stored, once, we want to let the robot record multiple figures and redraw them. In order to do that, it is needed to redesign the project so that we can let the robot record and redraw multiple figures in a go. Push buttons were used, push button connected to pin 21 was used to store another figure once the first figure is read. Each figure's reading is finished once the time limit is over. then it waits for the push button to be pushed to record another figure. Push button which is not connected to any pin has to be used now to redraw the recorded figures. Inorder to do that the pushbutton was connected to pin 25 and other pin of the push button was connected to ground. It worked fine after several tests with minor updates. 
+
+Then the feature of the Line robot needed to be extended so that it can recognise Circle,Rectangle and Triangle. The simplest logical soluton for this was to check the maximum turn the robot has made while recording. This was made another project so that it wont mess with the project we have done so far. This project is designed so that it records only one figure at a time and expect only circle, rectangle and triangle is checked with the robot. For each of these figure we designed a threshold value to be checked for maximum turning point. For triangle the robot turns most. Then it turns more for rectangle, for circle it will not turn more than some value. In order to obtain the threshold value of each figure, the recorded file of each figures are checked seperately and looked for average maximum value. And this value is assigned to the threshold of that particular figure while checking. And it found successful.
+
+
+Conclusion
+
+The project can be extend draw the recorded figure more acurately by introducing the same delay taken by sensor for each reading, at the time of redraw. For which the wait() fucnton of mbed library can be used. Record the delay along with the data and reproduce it. 
+
+Inorder to scale the redraw speed of the motor can be controlled while redrawing it. Increase it to draw bigger size figures and decrease speed to draw smaller size figures.
+
+Use the master slave program directly to get accurate access the resources of 3pi robot.
+
+Use other sensors so that angles of rotation and the distance traveled can be calculated. Or calculate the distance travelled by the motor accurately depending on its RPM and also considering the current speed. Which will let more accurate reproduction of the figures.
+
+The project can be further extended with more other sensors so that it can avoid collision with any objects on its path.
+
+Thanks
+
+
+
